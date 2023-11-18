@@ -4,6 +4,7 @@ import { twiml } from 'twilio';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserOperationLog } from './schemas/user-log.schema';
 import { Model } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 const { VoiceResponse } = twiml;
 
 
@@ -11,7 +12,8 @@ const { VoiceResponse } = twiml;
 export class TwilioService {
     private readonly logger = new Logger(TwilioService.name);
     constructor(
-        @InjectModel(UserOperationLog.name) private readonly userLogRepository: Model<UserOperationLog>
+        @InjectModel(UserOperationLog.name) private readonly userLogRepository: Model<UserOperationLog>,
+        private readonly config: ConfigService
     ) { }
 
     getInitialUserInput(): string {
@@ -32,7 +34,7 @@ export class TwilioService {
             response.dial({
                 action: '/twilio/handle-dial-status',
                 method: 'POST'
-            }, '+923105428669');
+            }, this.config.get('DAIL_NUMBER'));
         } else if (userChoice === '2') {
             response.say('Please leave a message after the beep. and Press the hash key when finished.');
             response.record({

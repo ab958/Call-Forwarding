@@ -2,12 +2,19 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TwilioModule } from './twilio/twilio.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://wahab:Ahhad123@cluster0.gnqnx.mongodb.net/'),
-    // MongooseModule.forFeature([{ name: Permission.name, schema: PermissionSchema },
-    // { name: Log.name, schema: LogSchema }]),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: (config: ConfigService) => ({
+        uri: config.get('MONGO_URL'),
+      }),
+      inject: [ConfigService],
+    }),
     TwilioModule
   ],
   controllers: [AppController],
